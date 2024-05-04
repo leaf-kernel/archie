@@ -1,3 +1,6 @@
+
+#include "archie.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
@@ -10,6 +13,9 @@
 #include "lib/ini.h"
 #include "utils.h"
 #include "config.h"
+#include "codegen.h"
+
+bool _verbose;
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +28,8 @@ int main(int argc, char *argv[])
 
     char *out_dir = NULL;
     char *config_file = NULL;
+    _verbose = false;
+
     for (int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
@@ -49,6 +57,12 @@ int main(int argc, char *argv[])
                     return EXIT_FAILURE;
                 }
             }
+
+            i++;
+        }
+        else if (strcmp(argv[i], "-V") == 0 || strcmp(argv[i], "--verbose") == 0)
+        {
+            _verbose = true;
         }
         else
         {
@@ -81,7 +95,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("[Archie] \x1B[34mINFO\x1B[0m Config file: %s\n", config_file);
+    if (_verbose)
+        printf("[Archie] \x1B[34mINFO\x1B[0m Config file: %s\n", config_file);
 
     if (mkdir(out_dir, 0755) != 0)
     {
@@ -106,6 +121,19 @@ int main(int argc, char *argv[])
     {
         printf("[Archie] \x1B[31mERROR\x1B[0m Bad config file (first error on line %d)!\n", ini_err);
         return 3;
+    }
+
+    bool s = codegen(out_dir);
+
+    if (!s)
+    {
+        printf("[Archie] \x1B[31mERROR\x1B[0m Failed to generate build files!\n");
+        return EXIT_FAILURE;
+    }
+    else
+    {
+        printf("[Archie] \x1B[32mSUCCESS\x1B[0m Generated build files!\n");
+        return EXIT_SUCCESS;
     }
 
     return 0;

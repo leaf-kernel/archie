@@ -8,5 +8,6 @@
 #define VERSION_STR "v0.1.0"
 
 void usage(char *s);
+int create_directory(const char *path);
 
 #endif // __UTILS_H__

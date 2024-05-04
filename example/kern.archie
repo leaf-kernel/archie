@@ -1,18 +1,20 @@
 [Info]
 name = Leaf Kernel
+architectures = x86_64
 
 [Compiling]
+kernel_dir = kernel
 cmake = true
+use_toolchain_files = true
 cmake_build_tool = ninja
 
 [arch.x86_64]
+# Toolchain
 cc = x86_64-elf-gcc
+cxx = x86_64-elf-gcc
+as = nasm
 ld = x86_64-elf-ld
 ld_file = x64linker.ld
-use_toolchain_files = true
 
-[arch.i386]
-cc = i386-elf-gcc
-ld = i386-elf-ld
-ld_file = x86linker.ld
-use_toolchain_files = true
+# Flags
+nasm_obj = elf64
