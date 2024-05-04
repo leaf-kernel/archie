@@ -1,17 +1,15 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <dirent.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <errno.h>
 #include <time.h>
 
 #include "lib/ini.h"
 #include "utils.h"
+#include "config.h"
 
 int main(int argc, char *argv[])
 {
@@ -38,8 +36,19 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(argv[i], "-C") == 0 || strcmp(argv[i], "--config") == 0)
         {
-            config_file = argv[++i];
-            return 0;
+            config_file = argv[i + 1];
+
+            if (strcmp(config_file, ".") == 0)
+            {
+
+                printf("[Archie] \x1B[33mWARNING\x1B[0m Config file cant be \".\" defaulting to \"config.archie\"\n");
+                config_file = "config.archie";
+                if (access(config_file, F_OK) != 0)
+                {
+                    printf("[Archie] \x1B[31mERROR\x1B[0m Config file \"%s\" does not exist!\n", config_file);
+                    return EXIT_FAILURE;
+                }
+            }
         }
         else
         {
@@ -72,6 +81,8 @@ int main(int argc, char *argv[])
         }
     }
 
+    printf("[Archie] \x1B[34mINFO\x1B[0m Config file: %s\n", config_file);
+
     if (mkdir(out_dir, 0755) != 0)
     {
         if (errno == EEXIST)
@@ -83,7 +94,18 @@ int main(int argc, char *argv[])
             printf("[Archie] \x1B[31mERROR\x1B[0m Failed to create output directory \"%s\": %s\n", out_dir, strerror(errno));
             return EXIT_FAILURE;
         }
-        return EXIT_FAILURE;
+    }
+
+    int ini_err = ini_parse(config_file, parse_config, NULL);
+    if (ini_err < 0)
+    {
+        printf("[Archie] \x1B[31mERROR\x1B[0m Can't read '%s'!\n", config_file);
+        return 2;
+    }
+    else if (ini_err)
+    {
+        printf("[Archie] \x1B[31mERROR\x1B[0m Bad config file (first error on line %d)!\n", ini_err);
+        return 3;
     }
 
     return 0;
