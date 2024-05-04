@@ -1,0 +1,18 @@
+[Info]
+name = Leaf Kernel
+
+[Compiling]
+cmake = true
+cmake_build_tool = ninja
+
+[arch.x86_64]
+cc = x86_64-elf-gcc
+ld = x86_64-elf-ld
+ld_file = x64linker.ld
+use_toolchain_files = true
+
+[arch.i386]
+cc = i386-elf-gcc
+ld = i386-elf-ld
+ld_file = x86linker.ld
+use_toolchain_files = true
